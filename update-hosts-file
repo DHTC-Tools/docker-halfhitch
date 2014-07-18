@@ -1,0 +1,17 @@
+#!/bin/sh
+
+cd /etc/hosts.d || exit 255
+
+/bin/cp -fp /etc/hosts /etc/hosts.ok
+cat * >.hosts.tmp
+
+if diff /etc/hosts .hosts.tmp >/dev/null 2>&1; then
+	# files are same
+	rm .hosts.tmp
+	exit
+fi
+
+if grep localhost .hosts.tmp >/dev/null 2>&1; then
+	/bin/mv -f .hosts.tmp /etc/hosts
+	/etc/init.d/iptables reload
+fi

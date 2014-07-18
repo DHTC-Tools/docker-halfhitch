@@ -1,0 +1,15 @@
+#!/bin/sh
+
+cd /etc/hosts.d || exit 255
+docker ps -q | while read id; do
+	docker inspect $id \
+	| jq -a -M -r '.[0].Name, .[0].NetworkSettings.IPAddress' \
+	| tr -d / \
+	| tr '\012' ' ' \
+	| (
+		read name ip
+		if [ -n "$name" -a -n "$ip" ]; then
+			echo $ip $name.local
+		fi
+	)
+done >10-docker
